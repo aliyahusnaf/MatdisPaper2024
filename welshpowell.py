@@ -3,13 +3,6 @@ import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
 
-adj_list = {
-    "Room A": ["Room B", "Room C", "Room D", "Room E"],
-    "Room B": ["Room A", "Room C", "Room D", "Room E"],
-    "Room C": ["Room A", "Room B", "Room D", "Room E"],
-    "Room D": ["Room A", "Room B", "Room C", "Room E"],
-    "Room E": ["Room A", "Room B", "Room C", "Room D"],
-    }
 
 def create_adjacency_matrix_from_list(adj_list):
     nodes = list(adj_list.keys())
@@ -25,6 +18,7 @@ def create_adjacency_matrix_from_list(adj_list):
 
     return matrix, nodes
 
+# Welsh-Powell untuk pewarnaan graf
 def welsh_powell(graph):
     sorted_nodes = sorted(graph.keys(), key=lambda x: len(graph[x]), reverse=True)
     colors = {}
@@ -41,18 +35,33 @@ def welsh_powell(graph):
             available_colors.append(new_color)
     return colors
 
+adj_list = {
+    "Room A": ["Room C", "Room D"],
+    "Room B": ["Room D", "Room E"],
+    "Room C": ["Room A", "Room B"],
+    "Room D": ["Room C", "Room A"],
+    "Room E": ["Room A", "Room D", "Room B"],
+    }
 
 adj_matrix, nodes = create_adjacency_matrix_from_list(adj_list)
 adj_matrix_df = pd.DataFrame(adj_matrix, index=nodes, columns=nodes)
 
+graph = {node: [] for node in nodes}
+for i, node1 in enumerate(nodes):
+    for j, node2 in enumerate(nodes):
+        if adj_matrix[i][j] == 1:
+            graph[node1].append(node2)
 
-colors = welsh_powell(adj_list)
+colors = welsh_powell(graph)
+
 min_cctv = max(colors.values())
 
 print("Adjacency Matrix:")
 print(adj_matrix_df)
 
+
 print(f"\nMinimum CCTV needed: {min_cctv}")
+
 
 print("\nColor for every room:")
 for room, color in colors.items():
@@ -70,9 +79,8 @@ def visualize_colored_graph(graph, colors):
 
     plt.figure(figsize=(12, 8))
     pos = nx.spring_layout(G) 
-    nx.draw(G, pos, with_labels=True, node_color=node_colors, cmap=plt.cm.Set3, 
-            node_size=2000, font_size=10)
+    nx.draw(G, pos, with_labels=True, node_color=node_colors, cmap=plt.cm.Set3, node_size=2000, font_size=10)
     plt.title("Colored Room Graph")
     plt.show()
 
-visualize_colored_graph(adj_list, colors)
+visualize_colored_graph(graph, colors)
